@@ -305,19 +305,6 @@ def create_app(test_config=None):
             404,
         )
 
-    @app.errorhandler(405)
-    def not_allowed(error):
-        return (
-            jsonify(
-                {
-                    "success": False,
-                    "error": 405,
-                    "message": f"method not allowed : {error.description}",
-                }
-            ),
-            405,
-        )
-
     @app.errorhandler(422)
     def unprocessable(error):
         return (
@@ -329,6 +316,19 @@ def create_app(test_config=None):
                 }
             ),
             422,
+        )
+
+    @app.errorhandler(500)
+    def server_error(error):
+        return (
+            jsonify(
+                {
+                    "success": False,
+                    "error": 500,
+                    "message": f"server error : {error.description}",
+                }
+            ),
+            500,
         )
 
     return app
