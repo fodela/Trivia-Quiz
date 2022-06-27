@@ -117,7 +117,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(len(data["questions"]))
         self.assertEqual(deleted_question, None)
 
-    def test_404_book_to_be_deleted_does_not_exist(self):
+    def test_404_question_to_be_deleted_does_not_exist(self):
         res = self.client().delete("/questions/9999")
         data = json.loads(res.data)
 
@@ -153,23 +153,13 @@ class TriviaTestCase(unittest.TestCase):
         )
 
     def test_search_questions(self):
-        res = self.client().post("questions/results", json=self.search_term)
+        res = self.client().post("questions", json=self.search_term)
         data = json.loads(res.data)
 
         self.assertEqual(data["success"], True)
         self.assertEqual(res.status_code, 200)
         self.assertTrue(data["total_questions"])
         self.assertTrue(len(data["categories"]))
-
-    def test_400_undefined_search_term(self):
-        res = self.client().post("questions/results", json=self.bad_search_term)
-        data = json.loads(res.data)
-
-        self.assertEqual(data["success"], False)
-        # check error code
-        self.assertEqual(res.status_code, 400)
-        # check message
-        self.assertEqual(data["message"], "bad request : Search term is undefined")
 
     def test_get_questions_by_category(self):
         res = self.client().get("/categories/1/questions")
@@ -181,14 +171,16 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data["total_questions"])
 
     def test_404_if_category_does_not_exist(self):
-        res = self.client().post("questions/results", json=self.bad_search_term)
+        res = self.client().get("/categories/9999/questions")
         data = json.loads(res.data)
 
         self.assertEqual(data["success"], False)
         # check error code
-        self.assertEqual(res.status_code, 400)
+        self.assertEqual(res.status_code, 404)
         # check message
-        self.assertEqual(data["message"], "bad request : Search term is undefined")
+        self.assertEqual(
+            data["message"], "resource not found : Selected category does not exist"
+        )
 
     def test_get_quiz_questions(self):
 

@@ -117,57 +117,9 @@ def create_app(test_config=None):
     def post_new_question():
 
         body = request.get_json()
-
-        # define the components of the question
-        qst_details = {
-            "new_question": body.get("question", None),
-            "new_answer": body.get("answer", None),
-            "new_category": body.get("category", None),
-            "new_difficulty": body.get("difficulty", None),
-        }
-
-        # raise error if any parameter is missing
-        for detail in qst_details:
-            if not qst_details[detail]:
-                abort(400, "A detail of the new question is not defined")
-
-            else:
-                question = Question(
-                    question=qst_details["new_question"],
-                    answer=qst_details["new_answer"],
-                    category=qst_details["new_category"],
-                    difficulty=qst_details["new_difficulty"],
-                )
-
-        try:
-
-            question.insert()
-
-            all_questions = Question.query.order_by(Question.id).all()
-            current_questions = paginate_questions(request, all_questions)
-            return jsonify(
-                {
-                    "success": True,
-                    "created": question.id,
-                    "questions": current_questions,
-                    "total_questions": len(question.query.all()),
-                }
-            )
-
-        except Exception as err:
-            abort(err.code)
-
-    @app.route("/questions/results", methods=["POST"])
-    def search_questions():
-
-        body = request.get_json()
         search_term = body.get("searchTerm")
 
-        if search_term is None:
-
-            abort(400, "Search term is undefined")
-
-        else:
+        if search_term:
             try:
                 categories = get_all_categories().get_json()["categories"]
 
@@ -181,9 +133,50 @@ def create_app(test_config=None):
                     {
                         "success": True,
                         "questions": questions,
-                        "total_questions": len(result_query),
+                        "total_questions": len(Question.query.all()),
                         "categories": categories,
                         "current_category": None,
+                    }
+                )
+
+            except Exception as err:
+                abort(err.code)
+
+        else:
+
+            # define the components of the question
+            qst_details = {
+                "new_question": body.get("question", None),
+                "new_answer": body.get("answer", None),
+                "new_category": body.get("category", None),
+                "new_difficulty": body.get("difficulty", None),
+            }
+
+            # raise error if any parameter is missing
+            for detail in qst_details:
+                if not qst_details[detail]:
+                    abort(400, "A detail of the new question is not defined")
+
+                else:
+                    question = Question(
+                        question=qst_details["new_question"],
+                        answer=qst_details["new_answer"],
+                        category=qst_details["new_category"],
+                        difficulty=qst_details["new_difficulty"],
+                    )
+
+            try:
+
+                question.insert()
+
+                all_questions = Question.query.order_by(Question.id).all()
+                current_questions = paginate_questions(request, all_questions)
+                return jsonify(
+                    {
+                        "success": True,
+                        "created": question.id,
+                        "questions": current_questions,
+                        "total_questions": len(Question.query.all()),
                     }
                 )
 
