@@ -58,11 +58,28 @@ If you get an error due to the old version of react used, fix it by running
 export NODE_OPTIONS=--openssl-legacy-provider && yarn build && yarn install --production --ignore-scripts --prefer-offline
 ```
 
-### Setting up the Database
+## Setting up the Database
+
+---
+
+With Postgres running, create a `trivia` database:
+
+```bash
+createbd trivia
+```
+
+Populate the database using the `trivia.psql` file provided. From the `backend` folder in terminal run:
+
+```bash
+psql trivia < trivia.psql
+```
+
+### Setting up environment variables for database
 
 1. In the `/backend` directory, create a file named `.env`
-
-2.Open the `.env` file in your IDE 3. Copy the content of env_example into the `.env` 4. Provide the database username and database password
+2. Open the `.env` file in your IDE
+3. Copy the content of env_example into the `.env`
+4. Provide the database username and database password
 
 ```
 DB_USERNAME = "my_username"
@@ -94,36 +111,318 @@ python test_flaskr.py
 
 Omit the dropdb command the first time you run tests.
 
-### API Reference
+## API Reference
 
 ---
 
-## About the Stack
+`GET '/categories'`
 
-We started the full stack application for you. It is designed with some key functional areas:
+- Fetches a dictionary of questions in which the keys are the ids and the value is the corresponding string of the category
+- Request Arguments: None
+- Returns: An object with a single key, `categories`, that contains an object of `id: category_string` key: value pairs.
 
-### Backend
+Sample request via `curl`
 
-The [backend](./backend/README.md) directory contains a partially completed Flask and SQLAlchemy server. You will work primarily in `__init__.py` to define your endpoints and can reference models.py for DB and SQLAlchemy setup. These are the files you'd want to edit in the backend:
+```
+curl http://127.0.0.1:5000/categories
+```
 
-1. `backend/flaskr/__init__.py`
-2. `backend/test_flaskr.py`
+Response
 
-> View the [Backend README](./backend/README.md) for more details.
+```json
+{
+	"categories": {
+		"1": "Science",
+		"2": "Art",
+		"3": "Geography",
+		"4": "History",
+		"5": "Entertainment",
+		"6": "Sports"
+	},
+	"success": true
+}
+```
 
-### Frontend
+`GET '/questions'`
 
-The [frontend](./frontend/README.md) directory contains a complete React frontend to consume the data from the Flask server. If you have prior experience building a frontend application, you should feel free to edit the endpoints as you see fit for the backend you design. If you do not have prior experience building a frontend application, you should read through the frontend code before starting and make notes regarding:
+- Fetches questions, including pagination (every 10 questions)
+- Request Arguments: None
+- Returns: A list of questions, number of total questions, current category, categories.
 
-1. What are the end points and HTTP methods the frontend is expecting to consume?
-2. How are the requests from the frontend formatted? Are they expecting certain parameters or payloads?
+Sample request via `curl`
 
-Pay special attention to what data the frontend is expecting from each API response to help guide how you format your API. The places where you may change the frontend behavior, and where you should be looking for the above information, are marked with `TODO`. These are the files you'd want to edit in the frontend:
+```
+curl http://127.0.0.1:5000/questions
+```
 
-1. `frontend/src/components/QuestionView.js`
-2. `frontend/src/components/FormView.js`
-3. `frontend/src/components/QuizView.js`
+Response
 
-By making notes ahead of time, you will practice the core skill of being able to read and understand code and will have a simple plan to follow to build out the endpoints of your backend API.
+```json
+{
+	"categories": {
+		"1": "Science",
+		"2": "Art",
+		"3": "Geography",
+		"4": "History",
+		"5": "Entertainment",
+		"6": "Sports"
+	},
+	"current_category": null,
+	"len_question": 10,
+	"questions": [
+		{
+			"answer": "Apollo 13",
+			"category": 5,
+			"difficulty": 4,
+			"id": 2,
+			"question": "What movie earned Tom Hanks his third straight Oscar nomination, in 1996?"
+		},
+		{
+			"answer": "Tom Cruise",
+			"category": 5,
+			"difficulty": 4,
+			"id": 4,
+			"question": "What actor did author Anne Rice first denounce, then praise in the role of her beloved Lestat?"
+		},
+		{
+			"answer": "Maya Angelou",
+			"category": 4,
+			"difficulty": 2,
+			"id": 5,
+			"question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?"
+		},
+		{
+			"answer": "Edward Scissorhands",
+			"category": 5,
+			"difficulty": 3,
+			"id": 6,
+			"question": "What was the title of the 1990 fantasy directed by Tim Burton about a young man with multi-bladed appendages?"
+		},
+		{
+			"answer": "Brazil",
+			"category": 6,
+			"difficulty": 3,
+			"id": 10,
+			"question": "Which is the only team to play in every soccer World Cup tournament?"
+		},
+		{
+			"answer": "Uruguay",
+			"category": 6,
+			"difficulty": 4,
+			"id": 11,
+			"question": "Which country won the first ever soccer World Cup in 1930?"
+		},
+		{
+			"answer": "George Washington Carver",
+			"category": 4,
+			"difficulty": 2,
+			"id": 12,
+			"question": "Who invented Peanut Butter?"
+		},
+		{
+			"answer": "Lake Victoria",
+			"category": 3,
+			"difficulty": 2,
+			"id": 13,
+			"question": "What is the largest lake in Africa?"
+		},
+		{
+			"answer": "The Palace of Versailles",
+			"category": 3,
+			"difficulty": 3,
+			"id": 14,
+			"question": "In which royal palace would you find the Hall of Mirrors?"
+		},
+		{
+			"answer": "Agra",
+			"category": 3,
+			"difficulty": 2,
+			"id": 15,
+			"question": "The Taj Mahal is located in which Indian city?"
+		}
+	],
+	"success": true,
+	"total_questions": 23
+}
+```
 
-> View the [Frontend README](./frontend/README.md) for more details.
+`DELETE '/questions/<int:question_id>'`
+
+- `DELETE` a question using a question `ID`
+- Request Arguments: question `ID`
+- Returns: `ID` of question that was deleted and the remaining questions
+
+Sample request via `curl`
+
+```
+curl -X DELETE http://127.0.0.1:5000/questions/23
+```
+
+Response
+
+```json
+{
+	"deleted": 23,
+	"questions": [
+		{
+			"answer": "Apollo 13",
+			"category": 5,
+			"difficulty": 4,
+			"id": 2,
+			"question": "What movie earned Tom Hanks his third straight Oscar nomination, in 1996?"
+		},
+		{
+			"answer": "Tom Cruise",
+			"category": 5,
+			"difficulty": 4,
+			"id": 4,
+			"question": "What actor did author Anne Rice first denounce, then praise in the role of her beloved Lestat?"
+		},
+		{
+			"answer": "Maya Angelou",
+			"category": 4,
+			"difficulty": 2,
+			"id": 5,
+			"question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?"
+		},
+		{
+			"answer": "Edward Scissorhands",
+			"category": 5,
+			"difficulty": 3,
+			"id": 6,
+			"question": "What was the title of the 1990 fantasy directed by Tim Burton about a young man with multi-bladed appendages?"
+		},
+		{
+			"answer": "Brazil",
+			"category": 6,
+			"difficulty": 3,
+			"id": 10,
+			"question": "Which is the only team to play in every soccer World Cup tournament?"
+		},
+		{
+			"answer": "Uruguay",
+			"category": 6,
+			"difficulty": 4,
+			"id": 11,
+			"question": "Which country won the first ever soccer World Cup in 1930?"
+		},
+		{
+			"answer": "George Washington Carver",
+			"category": 4,
+			"difficulty": 2,
+			"id": 12,
+			"question": "Who invented Peanut Butter?"
+		},
+		{
+			"answer": "Lake Victoria",
+			"category": 3,
+			"difficulty": 2,
+			"id": 13,
+			"question": "What is the largest lake in Africa?"
+		},
+		{
+			"answer": "The Palace of Versailles",
+			"category": 3,
+			"difficulty": 3,
+			"id": 14,
+			"question": "In which royal palace would you find the Hall of Mirrors?"
+		},
+		{
+			"answer": "Agra",
+			"category": 3,
+			"difficulty": 2,
+			"id": 15,
+			"question": "The Taj Mahal is located in which Indian city?"
+		}
+	],
+	"success": true,
+	"total_questions": 22
+}
+```
+
+`POST '/questions'`
+
+- Creates a new question, which will require the details of the new question (question and answer text, category, and difficulty score.)
+- Request Arguments: None
+- Returns:
+
+Sample request via `curl`
+
+```
+curl -X DELETE http://127.0.0.1:5000/questions/23
+```
+
+Response
+
+`GET '/categories/<int:category_id>/questions'`
+
+- Fetches questions based on category.
+- Request Arguments: `ID` of the category
+- Returns: A list of questions, number of total questions, current category, categories in a selected category.
+
+Sample request via `curl`
+
+```
+curl http://127.0.0.1:5000/categories/1/questions
+```
+
+Response
+
+```
+{
+  "current_category": "Science",
+  "questions": [
+    {
+      "answer": "The Liver",
+      "category": 1,
+      "difficulty": 4,
+      "id": 20,
+      "question": "What is the heaviest organ in the human body?"
+    },
+    {
+      "answer": "Alexander Fleming",
+      "category": 1,
+      "difficulty": 3,
+      "id": 21,
+      "question": "Who discovered penicillin?"
+    },
+    {
+      "answer": "Blood",
+      "category": 1,
+      "difficulty": 4,
+      "id": 22,
+      "question": "Hematology is a branch of medicine involving the study of what?"
+    }
+  ],
+  "success": true,
+  "total_questions": 3
+}
+```
+
+`POST '/quizzes'`
+
+- Fetches questions to play the quiz. It takes a category and previous question parameters.
+- Request Arguments: None
+- Returns: A random questions within the given category, if provided, and that is not one of the previous questions.
+
+Sample request via `curl`
+
+```
+curl http://127.0.0.1:5000/quizzes -X POST -H "Content-Type: application/json" -d '{"previous_questions": [1,2], "quiz_category": {"type": "Science", "id": "1"}}'
+```
+
+Response
+
+```json
+{
+	"previous_questions": [1, 2],
+	"question": {
+		"answer": "The Liver",
+		"category": 1,
+		"difficulty": 4,
+		"id": 20,
+		"question": "What is the heaviest organ in the human body?"
+	},
+	"success": true
+}
+```
